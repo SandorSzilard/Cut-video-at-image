@@ -32,3 +32,6 @@ The main part is composed from 3 Scripts:
 5. *Depending if you have multiple videos* Step 3-4 will have to be repeated (as many times as many videos you have)
 6. When all the videos were processed and the cutpoints were marked, a popup will mark that you can proceed to the video slicing process; Press OK
 7. Slicing is done automatically, the output is exported to the "Outputs" folder => if the script is not working, you can run it manually ("3. Cut_Video")
+
+
+## Tested on Windows Powershell (windows 10)! I don't guarantee it will work on Linux/Mac/etc.)
