@@ -23,6 +23,8 @@ The main part is composed from 3 Scripts:
    -It is called automatically at the end of the "detect image" script
    -it splices the videos into chunks and puts them in the *Outputs* folder
 
+#You will have to download ffmpeg.exe and put it in the main folder (sorry...it's too big for Git): https://ffmpeg.org/download.html
+
 
 # How to use it:
 1. Put your videos in the "Videos" folder
