@@ -9,7 +9,7 @@ $image = ".\Input\"
 
 ### Main Program ______________________________________________________________________________________________________
 
-foreach ($video in dir $folder -include $filter -exclude "*_???.*" -r){
+foreach ($video in dir $folder -include $filter -exclude "*_???.*, .gitkeep, .gitignore" -r){
 
   ### Set path to logfile
   $logfile = "$($video.FullName)_ffmpeg.log"
