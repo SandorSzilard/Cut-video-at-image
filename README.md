@@ -38,6 +38,10 @@ The main part is composed from 3 Scripts:
 
 ## Tested on Windows Powershell (windows 10)! I don't guarantee it will work on Linux/Mac/etc.)
 
+Sources (and code inspiration):
+https://superuser.com/questions/692489/automatically-split-large-mov-video-files-into-smaller-files-at-black-frames-s
+
 ## Latest update:
 Added CUDA Hardware acceleration. Disabled by default. Can be activated by changing the variable at the beginning of both powershell scripts.
 Tested on Nvidia Rtx 360Ti => It's with about 100fps faster than using CPU (AMD Ryzen 5 PRO 5650G)
+
