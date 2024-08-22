@@ -3,6 +3,7 @@ $ffmpeg = ".\ffmpeg.exe"            # Set path to your ffmpeg.exe; Build Version
 $folder = ".\Videos\*"              # Set path to your video folder; '\*' must be appended
 $filter = @("*.mp4")                # Set which file extensions should be processed
 $image_base = ".\Input\test.png"    # For custom image (don't forget extension/name)
+$enable_cuda = $false               # Option to enable CUDA functionality (experimental at ffmpeg), needs compatible GPU
 
 ### Main Program ______________________________________________________________________________________________________
 
@@ -19,7 +20,11 @@ foreach ($video in dir $folder -include $filter -exclude "*_???.*, .gitkeep, .gi
   $image_output = $image_base
   
   ### analyse each video with ffmpeg and search for image
-  & $ffmpeg -i $video -i $image_output -filter_complex "blend=difference:shortest=0,blackframe=99:32" -an -f null - 2>> $logfile
+  if($enable_cuda) {
+    & $ffmpeg -hwaccel cuda -i $video -i $image_output -filter_complex "blend=difference:shortest=0,blackframe=99:32" -an -f null - 2>> $logfile
+  } else {
+    & $ffmpeg -i $video -i $image_output -filter_complex "blend=difference:shortest=0,blackframe=99:32" -an -f null - 2>> $logfile
+  }
 
   ### Use regex to extract timings from logfile
   $text = @()

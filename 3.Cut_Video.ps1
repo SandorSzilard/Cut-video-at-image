@@ -1,7 +1,8 @@
 ### Options __________________________________________________________________________________________________________
 $ffmpeg = ".\ffmpeg.exe"            # Set path to your ffmpeg.exe; Build Version: git-45581ed (2014-02-16)
 $folder = ".\Videos\*"              # Set path to your video folder; '\*' must be appended
-$filter = @("*.mp4")        # Set which file extensions should be processed
+$filter = @("*.mp4")                # Set which file extensions should be processed
+$enable_cuda = $false
 
 ### Main Program ______________________________________________________________________________________________________
 
@@ -17,5 +18,9 @@ foreach ($video in dir $folder -include $filter -exclude "*_???.*, .gitkeep, .gi
   $output = ".\Outputs\" + $video.basename + "_%03d" + $video.extension
 
   ### use ffmpeg to split current video in parts according to their cut points
-  & $ffmpeg -i $video -f segment -segment_times $cuts -c copy -map 0 -reset_timestamps 1 $output 2> $logfile        
+  if($enable_cuda) {
+    & $ffmpeg -hwaccel cuda -i $video -f segment -segment_times $cuts -c copy -map 0 -reset_timestamps 1 $output 2> $logfile        
+  } else {
+    & $ffmpeg -i $video -f segment -segment_times $cuts -c copy -map 0 -reset_timestamps 1 $output 2> $logfile        
+  }
 }
