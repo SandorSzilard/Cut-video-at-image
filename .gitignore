@@ -1,0 +1,15 @@
+# ignore all logs
+*.log
+
+
+# ignore all exe
+*.exe
+
+# ignore all txt
+*.txt
+
+# ignore all csv
+*.csv
+
+
+
