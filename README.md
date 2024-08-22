@@ -37,3 +37,6 @@ The main part is composed from 3 Scripts:
 
 
 ## Tested on Windows Powershell (windows 10)! I don't guarantee it will work on Linux/Mac/etc.)
+
+Sources (and code inspiration):
+https://superuser.com/questions/692489/automatically-split-large-mov-video-files-into-smaller-files-at-black-frames-s
