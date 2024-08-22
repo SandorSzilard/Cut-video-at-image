@@ -17,7 +17,7 @@ foreach ($video in dir $folder -include $filter -exclude "*_???.*, .gitkeep, .gi
   & $ffmpeg -i $video -vf "select=eq(n\,10)" -vframes 1 $image_output >> $logfile
 
   # ------------------ uncomment this line if using custom image ---------------------------
-  $image_output = $image_base
+  # $image_output = $image_base
   
   ### analyse each video with ffmpeg and search for image
   if($enable_cuda) {
@@ -58,7 +58,9 @@ $Shell = New-Object -ComObject "WScript.Shell"
 $Button = $Shell.Popup("SAve the output.txt in application root. After that press OK", 0, "Hello", 0)
 
 }
-powershell -executionpolicy bypass -File ./3.Cut_Video.ps1
 
 $Shell = New-Object -ComObject "WScript.Shell"
-$Button = $Shell.Popup("Press OK for next Video", 0, "Hello", 0)
+$Button = $Shell.Popup("Send to slicing", 0, "Hello", 0)
+
+powershell -executionpolicy bypass -File ./3.Cut_Video.ps1
+
