@@ -1,11 +1,8 @@
  ### Options __________________________________________________________________________________________________________
 $ffmpeg = ".\ffmpeg.exe"            # Set path to your ffmpeg.exe; Build Version: git-45581ed (2014-02-16)
 $folder = ".\Videos\*"              # Set path to your video folder; '\*' must be appended
-$filter = @("*.mp4")        # Set which file extensions should be processed
-$dur = 2                            # Set the minimum detected black duration (in seconds)
-$pic = 0.98                         # Set the threshold for considering a picture as "black" (in percent)
-$pix = 0.15                         # Set the threshold for considering a pixel "black" (in luminance)
-$image = ".\Input\"
+$filter = @("*.mp4")                # Set which file extensions should be processed
+$image_base = ".\Input\test.png"    # For custom image (don't forget extension/name)
 
 ### Main Program ______________________________________________________________________________________________________
 
@@ -14,9 +11,12 @@ foreach ($video in dir $folder -include $filter -exclude "*_???.*, .gitkeep, .gi
   ### Set path to logfile
   $logfile = "$($video.FullName)_ffmpeg.log"
 
+  # ---------- Comment this 2 lines if using custom image --------------------
   $image_output = ".\Input\" + $video.basename + ".png"
-
   & $ffmpeg -i $video -vf "select=eq(n\,10)" -vframes 1 $image_output >> $logfile
+
+  # ------------------ uncomment this line if using custom image ---------------------------
+  $image_output = $image_base
   
   ### analyse each video with ffmpeg and search for image
   & $ffmpeg -i $video -i $image_output -filter_complex "blend=difference:shortest=0,blackframe=99:32" -an -f null - 2>> $logfile
