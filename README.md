@@ -8,19 +8,29 @@ This project was made by test, combining different powershel scripts and own jav
 The main part is composed from 3 Scripts:
 
 1. Detect image:
+
    -By default, it gets the 10th frame as the "logo" and compares that to the rest of the video => It can be manually added at the beginnig of the file (you will have to *COMMENT* the code at line 15,16 and *UNCOMMENT* line 19.
+
    -It uses ffmpeg  to search and mark the occurences of each frame that contains the image
+
    -each occurence is then saved in a csv and a JSON (to be formatted later by JS)
+
    -the script then opens the HTML and it saves the computed output
+
    -after the output is saved in the main folder, the user has to press OK, so the script can process forward (if you have multiple videos, it will process the next one; if not, then it will call the splicer script for sepparating the videos)
 
 3. Index HTML (and json.js, main.js)
+
    -It calls for the data and the main.js functionality
+
    -main.js searches for the consecutive frames that contains the image and marks the duration at which the video will be cut; it outputs a txt file (Don't change the name) and it makes it possible to download
+
    -you have to download the file (without changing the name) in the main folder
 
-4. Cut Video
+5. Cut Video
+
    -It is called automatically at the end of the "detect image" script
+
    -it splices the videos into chunks and puts them in the *Outputs* folder
 
 #You will have to download ffmpeg.exe and put it in the main folder (sorry...it's too big for Git): https://ffmpeg.org/download.html
