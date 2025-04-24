@@ -3,7 +3,7 @@ $ffmpeg = ".\ffmpeg.exe"            # Set path to your ffmpeg.exe; Build Version
 $folder = ".\Videos\*"              # Set path to your video folder; '\*' must be appended
 $filter = @("*.mp4")                # Set which file extensions should be processed
 $image_base = ".\Input\test.png"    # For custom image (don't forget extension/name)
-$enable_cuda = $false               # Option to enable CUDA functionality (experimental at ffmpeg), needs compatible GPU
+$enable_cuda = $true               # Option to enable CUDA functionality (experimental at ffmpeg), needs compatible GPU
 
 ### Main Program ______________________________________________________________________________________________________
 
