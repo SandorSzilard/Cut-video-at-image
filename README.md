@@ -1,57 +1,83 @@
 # Cut-video-at-image
-A Powershell script using ffmpeg to find an image in a video and cut the video at the image (similar to the application "cut at black" but it can be used with any image from the movie => ex. an intro screen in a serial maraton compilation, slicing the compilation in smaller chunks)
 
-The implementation uses different scripts and programming languages to obtain the wanted result.
+A small automated pipeline (PowerShell + ffmpeg) that finds a reference image (logo/intro frame) inside long videos and splits each video at those points.
 
-This project was made by test, combining different powershel scripts and own javascript code for formatting (becasue I don't really understand Regex/powershell, but I understand JS).
+## Table of contents
+- [Prerequisites](#prerequisites)
+- [Quick start](#quick-start)
+- [Configuration (config.json)](#configuration-configjson)
+- [Detection (1.Detect_Image.ps1)](#detection-1detect_imagesps1)
+- [Cutting (2.Cut_Video.ps1)](#cutting-2cut_videops1)
+- [Outputs and logs](#outputs-and-logs)
+- [Troubleshooting](#troubleshooting)
+- [Notes & contributing](#notes--contributing)
 
-The main part is composed from 3 Scripts:
+## Prerequisites
+- Windows PowerShell (5+ / PowerShell 7 recommended).
+- ffmpeg (and ffprobe) installed. Download builds at: https://ffmpeg.org/ or https://www.gyan.dev/ffmpeg/builds/ and place ffmpeg.exe/ffprobe.exe on PATH or set the full path in config.json.
+- Put your source videos in the configured videosFolder (default: Videos/).
 
-1. Detect image:
+## Quick start (few steps)
+1. Put videos into the Videos/ folder.
+2. Edit config.json:
+   - Set ffmpegPath (e.g. "ffmpeg.exe" if on PATH, or "C:\\path\\to\\ffmpeg.exe").
+   - Optionally set imagesFolder (where per-video reference images are saved), outputScale, and CUDA toggles.
+3. Run detection:
+   - Open PowerShell in the repo root and run:
+     ```powershell
+     .\1.Detect_Image.ps1
+     ```
+   - The script extracts (or uses) a reference image per video and runs detection. Per-video cut lists are written to CutLogs/{video}_cuts.txt.
+4. After detection finishes you will be prompted to start cutting. Press ENTER to continue (or run .\2.Cut_Video.ps1 manually).
+5. Check Outputs/ for created segments and Logs/ for per-operation logs.
 
-   -By default, it gets the 10th frame as the "logo" and compares that to the rest of the video => It can be manually added at the beginnig of the file (you will have to *COMMENT* the code at line 15,16 and *UNCOMMENT* line 19.
+## Configuration (config.json)
+Key options you will commonly use:
+- `ffmpegPath`: path to ffmpeg executable (required).
+- `imagesFolder`: where extracted/used reference images are stored (default "Input").
+- `videosFolder`: where input videos live (default "Videos").
+- `outputsFolder`: where segments are written (default "Outputs").
+- `logsFolder`: detection/cutting logs (default "Logs").
+- `cutLogsFolder`: per-video timestamp files (default "CutLogs").
+- `inputExtensions`: array of extensions to process (["mp4","mkv","mov","avi"]).
+- `outputScale`: optional "W:H" (width:height) to downscale output. Example: `"1920:1080"`. Empty = keep source resolution.
+- `useCudaForCut`: true to use NVENC when re-encoding (ensure your GPU supports it).
+- `detectSsimThreshold`: legacy Structural Similarity Index (SSIM) threshold — used only if you enable SSIM-based detection. The current default detection uses blend+difference + blackframe, so this value is kept for backward compatibility.
 
-   -It uses ffmpeg  to search and mark the occurences of each frame that contains the image
+## Detection (1.Detect_Image.ps1)
+- Extracts a reference image (or uses config.referenceImage) and runs ffmpeg with blend=difference + blackframe to detect frames similar/identical to the reference.
+- Produces per-video cut lists in CutLogs/{base}_cuts.txt (one timestamp per line, hh:mm:ss[.ms]).
+- Saves per-video reference images in imagesFolder and per-video ffmpeg stderr logs to Logs/detect-{base}.log.
 
-   -each occurence is then saved in a csv and a JSON (to be formatted later by JS)
+## Cutting (2.Cut_Video.ps1)
+- Reads CutLogs/{base}_cuts.txt and creates segments for each interval between timestamps.
+- Filenames are created as {base}_{index}{ext} (index starts at 1).
+- If outputScale is set and a downscale is necessary, segments are re-encoded to mp4; otherwise the script uses fast stream-copy to preserve quality and speed.
+- Per-video cutting logs are in Logs/cut-{base}.log.
 
-   -the script then opens the HTML and it saves the computed output
+## Outputs and logs
+- `Outputs/` — segmented video files.
+- `CutLogs/` — per-video timestamp files used by the cutter.
+- `Logs/` — ffmpeg stderr output for detection (detect-*.log) and cutting (cut-*.log).
+- Input images are in the imagesFolder you configure.
 
-   -after the output is saved in the main folder, the user has to press OK, so the script can process forward (if you have multiple videos, it will process the next one; if not, then it will call the splicer script for sepparating the videos)
+## Troubleshooting
+- ffmpeg not found: set config.ffmpegPath to the full path to ffmpeg.exe or put ffmpeg on PATH.
+- No cut files created: check Logs/detect-{base}.log for ffmpeg output and verify the reference image in imagesFolder.
+- "Unrecognized option 't ...'": ensure CutLogs timestamps are plain hh:mm:ss[.ms] and not embedded into one single string in the script; use the provided scripts unchanged.
+- If using CUDA/NVENC, ensure drivers and ffmpeg build support it; otherwise set useCudaForCut = false.
 
-3. Index HTML (and json.js, main.js)
+## Tips & customization
+- If logos vary slightly, you can adjust detection logic. The repo currently uses blackframe thresholding — ask to switch to SSIM or to tune thresholds.
+- Add minimum segment duration, padding, or overlap in 2.Cut_Video.ps1 if you need finer control.
+- To process subfolders recursively, modify Get-ChildItem calls with -Recurse.
 
-   -It calls for the data and the main.js functionality
+## Contributing
+- Fixes and improvements are welcome. Please fork the repository, create a feature branch, commit your changes, push to your fork, and open a pull request (PR) with a short description of the change.
+- When submitting a PR:
+  - Describe the problem and your fix.
+  - Include relevant logs or small test cases when possible.
+  - Update README or script comments if behavior changes.
+  - Keep logs/output patterns stable unless intentionally changed.
 
-   -main.js searches for the consecutive frames that contains the image and marks the duration at which the video will be cut; it outputs a txt file (Don't change the name) and it makes it possible to download
-
-   -you have to download the file (without changing the name) in the main folder
-
-5. Cut Video
-
-   -It is called automatically at the end of the "detect image" script
-
-   -it splices the videos into chunks and puts them in the *Outputs* folder
-
-#You will have to download ffmpeg.exe and put it in the main folder (sorry...it's too big for Git): https://ffmpeg.org/download.html
-
-
-# How to use it:
-1. Put your videos in the "Videos" folder
-2. Run the "1.Detect_Image" script (by default, it will detect the 10th frame as the "image") => ignore the errors, the script is running, but it takes some time depending on the length of the videos
-3. After detecting, the script will open a webpage => save the document in the main folder (where the scripts and index.html is located); After that you can close the page;
-4. Press OK on the popup screen from the script (!!! _WARNING_ !!! Don't press OK, untill the file from the HTML is saved inside the root folder !!!! )
-5. *Depending if you have multiple videos* Step 3-4 will have to be repeated (as many times as many videos you have)
-6. When all the videos were processed and the cutpoints were marked, a popup will mark that you can proceed to the video slicing process; Press OK
-7. Slicing is done automatically, the output is exported to the "Outputs" folder => if the script is not working, you can run it manually ("3. Cut_Video")
-
-
-## Tested on Windows Powershell (windows 10)! I don't guarantee it will work on Linux/Mac/etc.)
-
-Sources (and code inspiration):
-https://superuser.com/questions/692489/automatically-split-large-mov-video-files-into-smaller-files-at-black-frames-s
-
-## Latest update:
-Added CUDA Hardware acceleration. Disabled by default. Can be activated by changing the variable at the beginning of both powershell scripts.
-Tested on Nvidia Rtx 360Ti => It's with about 100fps faster than using CPU (AMD Ryzen 5 PRO 5650G)
 

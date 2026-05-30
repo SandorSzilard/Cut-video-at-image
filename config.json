@@ -1,0 +1,20 @@
+{
+  "ffmpegPath": "ffmpeg.exe",
+  "useCudaForDetect": false,
+  "useCudaForCut": false,
+  "referenceImage": "",
+  "referenceFrameNumber": 10,
+  "videosFolder": "Videos",
+  "imagesFolder": "Input",
+  "outputsFolder": "Outputs",
+  "logsFolder": "Logs",
+  "cutLogsFolder": "CutLogs",
+  "detectSsimThreshold": 1.0,
+  "outputScale": "",
+  "inputExtensions": [
+    "mp4",
+    "mkv",
+    "mov",
+    "avi"
+  ]
+}

@@ -1,14 +1,33 @@
-# ignore all logs
-*.log
+# Ignore input videos (do not commit user media)
+Videos/
 
-# ignore all exe
-*.exe
+# Ignore logs and outputs (generated artifacts)
+Logs/
+Outputs/
+CutLogs/
 
-# ignore all txt
-*.txt
+# Ignore optional web UI / artifacts (not required for automated pipeline)
+index.html
+*.js
+html/
+scripts/
 
-# ignore all csv
-*.csv
+# Ignore ffmpeg binaries (do not commit these)
+ffmpeg.exe
+ffplay.exe
+ffprobe.exe
+
+# Ignore generated images and thumbnails
+*.png
+*.jpg
+*.jpeg
+*_ref.*
+
+# Optional: ignore editor/project files
+*.user
+*.vs
+*.suo
+.vscode/
 
 
 
