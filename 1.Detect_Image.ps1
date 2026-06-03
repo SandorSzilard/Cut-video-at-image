@@ -33,7 +33,8 @@ if (-not $ffprobe) { Write-Warning 'ffprobe not found. FPS detection may fail.' 
 
 $videosFolder = Join-Path $PSScriptROOT $config.videosFolder
 $outputsFolder = Join-Path $PSScriptROOT $config.outputsFolder
-$imagesFolder = Join-Path $PSScriptROOT ($config.imagesFolder ? $config.imagesFolder : 'Input')
+$imagesFolderName = if ($config.imagesFolder) { $config.imagesFolder } else { 'Input' }
+$imagesFolder = Join-Path $PSScriptROOT $imagesFolderName
 $logsFolder = Join-Path $PSScriptROOT $config.logsFolder
 $cutLogsFolder = Join-Path $PSScriptROOT $config.cutLogsFolder
 

@@ -41,6 +41,7 @@ Key options you will commonly use:
 - `cutLogsFolder`: per-video timestamp files (default "CutLogs").
 - `inputExtensions`: array of extensions to process (["mp4","mkv","mov","avi"]).
 - `outputScale`: optional "W:H" (width:height) to downscale output. Example: `"1920:1080"`. Empty = keep source resolution.
+- `preferStreamCopy`: optional boolean (default `false`). When `false`, cuts are re-encoded to seek-friendly MP4 output for smoother playback/forward skipping. Set `true` to restore fast stream-copy behavior.
 - `useCudaForCut`: true to use NVENC when re-encoding (ensure your GPU supports it).
 - `detectSsimThreshold`: legacy Structural Similarity Index (SSIM) threshold — used only if you enable SSIM-based detection. The current default detection uses blend+difference + blackframe, so this value is kept for backward compatibility.
 
@@ -51,8 +52,9 @@ Key options you will commonly use:
 
 ## Cutting (2.Cut_Video.ps1)
 - Reads CutLogs/{base}_cuts.txt and creates segments for each interval between timestamps.
-- Filenames are created as {base}_{index}{ext} (index starts at 1).
-- If outputScale is set and a downscale is necessary, segments are re-encoded to mp4; otherwise the script uses fast stream-copy to preserve quality and speed.
+- Filenames are created as {base}_{index}.mp4 by default (index starts at 1).
+- Default behavior re-encodes to H.264/AAC MP4 with regular keyframes for smoother seeking during playback.
+- If `preferStreamCopy` is `true` and no scaling is needed, output uses fast stream-copy as {base}_{index}{ext}.
 - Per-video cutting logs are in Logs/cut-{base}.log.
 
 ## Outputs and logs

@@ -1,2 +1,0 @@
--Video playback is sloppy after cutting, the rendering is not smooth when skipping forward (old videos do not do that)
--UI bugs

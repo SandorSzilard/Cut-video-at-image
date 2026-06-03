@@ -10,6 +10,7 @@
   "logsFolder": "Logs",
   "cutLogsFolder": "CutLogs",
   "detectSsimThreshold": 1.0,
+  "preferStreamCopy": false,
   "outputScale": "",
   "inputExtensions": [
     "mp4",

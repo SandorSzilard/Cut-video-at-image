@@ -42,6 +42,7 @@ $cutLogsFolder = Join-Path $PSScriptRoot $config.cutLogsFolder
 
 # New config shortcuts
 $outputScale = $config.outputScale
+$preferStreamCopy = ($null -ne $config.preferStreamCopy -and [bool]$config.preferStreamCopy)
 
 # helper: get numeric resolution for a file (returns @{Width=..;Height=..} or $null)
 function Get-Resolution($path) {
@@ -123,10 +124,18 @@ foreach ($cutFile in $cutFiles) {
 			}
 		}
 
-		if ($willScale) {
-			# output named as "<base>_<index>.mp4" (index starts at 1)
+		$useStreamCopy = (-not $willScale) -and $preferStreamCopy
+		if ($useStreamCopy) {
+			# Compatibility mode: keep original codec/container by stream-copy.
+			# This is fast but seeking can be less smooth when source GOPs are long.
+			$outFile = Join-Path $outputsFolder ("${base}_$($i+1)$ext")
+			$ffmpegArgs = @("-y", "-i", $sourcePath, "-ss", $start)
+			if ($endArg) { $ffmpegArgs += @("-to", $endArg) }
+			$ffmpegArgs += @("-c", "copy", $outFile)
+			$ffmpegArgs = $ffmpegArgs | Where-Object { $_ -ne "" }
+		} else {
+			# Default mode: re-encode with regular keyframe cadence for smoother skipping.
 			$outFile = Join-Path $outputsFolder ("${base}_$($i+1).mp4")
-			# Re-encode and scale. Choose encoder based on CUDA flag.
 			if ($config.useCudaForCut) {
 				$videoEncoder = "h264_nvenc"
 				$presetArgs = @("-preset", "p7")
@@ -137,27 +146,29 @@ foreach ($cutFile in $cutFiles) {
 				$hwArgs = @()
 			}
 
-			# scale down while preserving aspect ratio; force_original_aspect_ratio=decrease ensures no upscaling within filter,
-			# but we already decided $willScale to avoid unnecessary re-encode.
-			# Use subexpression expansion so PowerShell does not parse the ':' as part of a variable name
-			$vf = "scale=$($targetW):$($targetH):force_original_aspect_ratio=decrease"
-			# Build args with -i then -ss and optional -to for reliable segment extraction
 			$ffmpegArgs = @("-y") + $hwArgs + @("-i", $sourcePath, "-ss", $start)
 			if ($endArg) { $ffmpegArgs += @("-to", $endArg) }
-			$ffmpegArgs += @("-vf", $vf, "-c:v", $videoEncoder) + $presetArgs + @("-c:a", "copy", $outFile)
-			$ffmpegArgs = $ffmpegArgs | Where-Object { $_ -ne "" }
-		} else {
-			# Fast stream copy (no re-encode)
-			# output named as "<base>_<index><ext>" (index starts at 1)
-			$outFile = Join-Path $outputsFolder ("${base}_$($i+1)$ext")
-			# Use -i then -ss and optional -to for reliable extraction; still using stream copy
-			$ffmpegArgs = @("-y", "-i", $sourcePath, "-ss", $start)
-			if ($endArg) { $ffmpegArgs += @("-to", $endArg) }
-			$ffmpegArgs += @("-c", "copy", $outFile)
+			if ($willScale) {
+				# Use subexpression expansion so PowerShell does not parse ':' as part of a variable name.
+				$vf = "scale=$($targetW):$($targetH):force_original_aspect_ratio=decrease"
+				$ffmpegArgs += @("-vf", $vf)
+			}
+			$ffmpegArgs += @(
+				"-c:v", $videoEncoder
+			) + $presetArgs + @(
+				"-g", "48",
+				"-keyint_min", "48",
+				"-sc_threshold", "0",
+				"-pix_fmt", "yuv420p",
+				"-movflags", "+faststart",
+				"-c:a", "aac",
+				"-b:a", "192k",
+				$outFile
+			)
 			$ffmpegArgs = $ffmpegArgs | Where-Object { $_ -ne "" }
 		}
 
-		Write-Output "Creating segment $outFile from $videoName (start=$start) (scaleRequested='$outputScale' willScale=$willScale)"
+		Write-Output "Creating segment $outFile from $videoName (start=$start) (scaleRequested='$outputScale' willScale=$willScale streamCopy=$useStreamCopy)"
 		# run ffmpeg and capture any errors to the per-video log
 		try {
 			& $ffmpeg @ffmpegArgs 2>> $logFile
