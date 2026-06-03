@@ -1,7 +1,7 @@
 {
   "ffmpegPath": "ffmpeg.exe",
-  "useCudaForDetect": false,
-  "useCudaForCut": false,
+  "useCudaForDetect": true,
+  "useCudaForCut": true,
   "referenceImage": "",
   "referenceFrameNumber": 10,
   "videosFolder": "Videos",

@@ -1,0 +1,24 @@
+Bug:
+On Autopilot (UI), after detecting, the cutting is not starting automatically.
+
+Bug:
+In that state, pressing stop for the autopilot does the detection faze again.
+
+Bug:
+While detecting/cutting manually, the autopilot should be disabled for the moment a task is running.
+
+Bug:
+While in the detection faze, in the progress bar the duration is detected correclty from the logs, but the current time progress is not (ex. always the last `time=` string from the logs)
+
+Bug:
+On the progreess bar if we have multiple videos, it doesnn't show the progress, it doesn't change from `0/x` (where x is the number of videos).
+
+Bug:
+If the detection didn't find any cut points (cuts.txt shows only one data at 0:00), the cutting script is giving errors.
+```
+Error parsing options for output file h264_nvenc.
+Error opening output files: Invalid argument
+Method invocation failed because [System.Char] does not contain a method named 'Trim'.
+```
+If no cut points are present, the video should be copied to the output folder regardless (maybe the resolution weas changed from the config, maybe it needs recoding to be done, etc.)
+

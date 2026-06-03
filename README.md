@@ -8,6 +8,7 @@ A small automated pipeline (PowerShell + ffmpeg) that finds a reference image (l
 - [Configuration (config.json)](#configuration-configjson)
 - [Detection (1.Detect_Image.ps1)](#detection-1detect_imagesps1)
 - [Cutting (2.Cut_Video.ps1)](#cutting-2cut_videops1)
+- [UI controller (ui.ps1)](#ui-controller-uips1)
 - [Outputs and logs](#outputs-and-logs)
 - [Troubleshooting](#troubleshooting)
 - [Notes & contributing](#notes--contributing)
@@ -22,6 +23,7 @@ A small automated pipeline (PowerShell + ffmpeg) that finds a reference image (l
 2. Edit config.json:
    - Set ffmpegPath (e.g. "ffmpeg.exe" if on PATH, or "C:\\path\\to\\ffmpeg.exe").
    - Optionally set imagesFolder (where per-video reference images are saved), outputScale, and CUDA toggles.
+   - If you keep ffmpeg local in the project root, place `ffmpeg.exe`, `ffprobe.exe`, and optionally `ffplay.exe` there too.
 3. Run detection:
    - Open PowerShell in the repo root and run:
      ```powershell
@@ -30,6 +32,17 @@ A small automated pipeline (PowerShell + ffmpeg) that finds a reference image (l
    - The script extracts (or uses) a reference image per video and runs detection. Per-video cut lists are written to CutLogs/{video}_cuts.txt.
 4. After detection finishes you will be prompted to start cutting. Press ENTER to continue (or run .\2.Cut_Video.ps1 manually).
 5. Check Outputs/ for created segments and Logs/ for per-operation logs.
+
+## UI controller (ui.ps1)
+- Run `.\ui.ps1` to open the WinForms controller.
+- The top row is grouped by function: Readme, Automation, and Files.
+- `Autopilot` runs detection first and then starts cutting automatically when detection finishes.
+- The status area shows live ffmpeg log output, error lines in red, and a `HH:MM:SS/HH:MM:SS` progress-style time display while jobs are running.
+- The progress bar tracks the current folder/file batch as detection and cutting move through the queue.
+- `Open Readme` loads `README_UI.md` into the status/log window so you can review only the UI workflow and setup checklist without leaving the UI.
+- The UI guide loads automatically when the window opens.
+- `Open Videos` opens the configured raw videos folder.
+- The `Run Detection` and `Run Cutting` buttons toggle to `Stop Detection` / `Stop Cutting` while a task is active.
 
 ## Configuration (config.json)
 Key options you will commonly use:
@@ -49,6 +62,11 @@ Key options you will commonly use:
 - Extracts a reference image (or uses config.referenceImage) and runs ffmpeg with blend=difference + blackframe to detect frames similar/identical to the reference.
 - Produces per-video cut lists in CutLogs/{base}_cuts.txt (one timestamp per line, hh:mm:ss[.ms]).
 - Saves per-video reference images in imagesFolder and per-video ffmpeg stderr logs to Logs/detect-{base}.log.
+
+### UI notes
+- The UI reads live ffmpeg logs from the per-video files above and reflects the current file and elapsed/duration time in the status bar.
+- Autopilot is a UI-only orchestration feature; it does not change the standalone detection or cutting scripts.
+- If no input videos are found, Autopilot will not start and the UI will report that there is nothing to process.
 
 ## Cutting (2.Cut_Video.ps1)
 - Reads CutLogs/{base}_cuts.txt and creates segments for each interval between timestamps.

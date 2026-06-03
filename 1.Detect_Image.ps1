@@ -69,6 +69,10 @@ $exts = $exts | ForEach-Object { $_.ToString().TrimStart('.').ToLower() } | Sort
 $allFiles = Get-ChildItem -Path $videosFolder -File -ErrorAction SilentlyContinue
 $videos = $allFiles | Where-Object { $exts -contains ($_.Extension.TrimStart('.').ToLower()) }
 Write-Output ("Found {0} input video(s) in {1} (extensions: {2})" -f $videos.Count, $videosFolder, ($exts -join ','))
+if ($videos.Count -eq 0) {
+	Write-Warning ("No input videos found in {0}. Add files to the folder and run detection again." -f $videosFolder)
+	exit 0
+}
 
 foreach ($video in $videos) {
 	$base = [IO.Path]::GetFileNameWithoutExtension($video.Name)
@@ -187,6 +191,11 @@ foreach ($video in $videos) {
 
 # All videos processed. Single notification and optional automatic cutting start:
 Write-Output ("Detection finished for all videos. Per-video cut files are in: {0}" -f $cutLogsFolder)
+$isUiMode = ($env:CUT_VIDEO_UI_MODE -eq '1')
+if ($isUiMode -or -not [Environment]::UserInteractive) {
+	Write-Output 'Non-interactive mode detected; skipping prompt and automatic cutting handoff.'
+	exit 0
+}
 $answer = Read-Host "Press ENTER to start cutting now, or type 'n' then ENTER to abort"
 if ($answer -eq 'n') {
 	Write-Output 'Aborting before cutting as requested.'
