@@ -1,7 +1,7 @@
 {
   "ffmpegPath": "ffmpeg.exe",
   "useCudaForDetect": false,
-  "useCudaForCut": false,
+  "useCudaForCut": true,
   "referenceImage": "",
   "referenceFrameNumber": 10,
   "videosFolder": "Videos",
@@ -10,6 +10,7 @@
   "logsFolder": "Logs",
   "cutLogsFolder": "CutLogs",
   "detectSsimThreshold": 1.0,
+  "preferStreamCopy": false,
   "outputScale": "",
   "inputExtensions": [
     "mp4",
