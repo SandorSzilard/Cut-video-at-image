@@ -1,4 +1,5 @@
-# Ignore input videos (do not commit user media)
+# Ignore input videos and generated outputs (do not commit user media or derived files)
+Input/
 Videos/
 
 # Ignore logs and outputs (generated artifacts)
@@ -22,6 +23,9 @@ ffprobe.exe
 *.jpg
 *.jpeg
 *_ref.*
+
+# Ignore user-specific runtime decisions
+.user_decisions.json
 
 # Optional: ignore editor/project files
 *.user

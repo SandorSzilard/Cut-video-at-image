@@ -9,6 +9,7 @@ A small automated pipeline (PowerShell + ffmpeg) that finds a reference image (l
 - [Detection (1.Detect_Image.ps1)](#detection-1detect_imagesps1)
 - [Cutting (2.Cut_Video.ps1)](#cutting-2cut_videops1)
 - [UI controller (ui.ps1)](#ui-controller-uips1)
+- [Agent guide (README_AI.md)](#agent-guide-readme_aimd)
 - [Outputs and logs](#outputs-and-logs)
 - [Troubleshooting](#troubleshooting)
 - [Notes & contributing](#notes--contributing)
@@ -30,6 +31,7 @@ A small automated pipeline (PowerShell + ffmpeg) that finds a reference image (l
      .\1.Detect_Image.ps1
      ```
    - The script extracts (or uses) a reference image per video and runs detection. Per-video cut lists are written to CutLogs/{video}_cuts.txt.
+   - If a matching cut-log from a previous run already exists, the script prompts whether to keep the existing results or re-run detection. Your choice is stored in .user_decisions.json so later runs stay consistent across restarts.
 4. After detection finishes you will be prompted to start cutting. Press ENTER to continue (or run .\2.Cut_Video.ps1 manually).
 5. Check Outputs/ for created segments and Logs/ for per-operation logs.
 
@@ -38,11 +40,17 @@ A small automated pipeline (PowerShell + ffmpeg) that finds a reference image (l
 - The top row is grouped by function: Readme, Automation, and Files.
 - `Autopilot` runs detection first and then starts cutting automatically when detection finishes.
 - The status area shows live ffmpeg log output, error lines in red, and a `HH:MM:SS/HH:MM:SS` progress-style time display while jobs are running.
-- The progress bar tracks the current folder/file batch as detection and cutting move through the queue.
+- During cutting, the progress bar tracks each small output segment and the UI shows `Cuts: x/total` when available.
+- `Clean` prompts for cleanup mode: `Yes` preserves raw `Videos/`, `No` deletes videos too, and `Cancel` aborts.
 - `Open Readme` loads `README_UI.md` into the status/log window so you can review only the UI workflow and setup checklist without leaving the UI.
 - The UI guide loads automatically when the window opens.
 - `Open Videos` opens the configured raw videos folder.
 - The `Run Detection` and `Run Cutting` buttons toggle to `Stop Detection` / `Stop Cutting` while a task is active.
+
+## Agent guide (README_AI.md)
+- `README_AI.md` is a concise agent-facing summary of the repository.
+- It highlights the detection/cutting workflow, key configuration options, UI controls, and cleanup behavior.
+- Use it when you want a short, modern entry point for automation or AI tooling.
 
 ## Configuration (config.json)
 Key options you will commonly use:
@@ -61,6 +69,7 @@ Key options you will commonly use:
 ## Detection (1.Detect_Image.ps1)
 - Extracts a reference image (or uses config.referenceImage) and runs ffmpeg with blend=difference + blackframe to detect frames similar/identical to the reference.
 - Produces per-video cut lists in CutLogs/{base}_cuts.txt (one timestamp per line, hh:mm:ss[.ms]).
+- If a matching cut-log already exists, the script uses it as the signal to prompt or skip reprocessing, rather than blindly re-detecting on every restart.
 - Saves per-video reference images in imagesFolder and per-video ffmpeg stderr logs to Logs/detect-{base}.log.
 
 ### UI notes
@@ -80,6 +89,7 @@ Key options you will commonly use:
 - `CutLogs/` — per-video timestamp files used by the cutter.
 - `Logs/` — ffmpeg stderr output for detection (detect-*.log) and cutting (cut-*.log).
 - Input images are in the imagesFolder you configure.
+- The UI `Clean` button removes generated logs, cut logs, outputs, and input images, but leaves the raw `Videos/` folder untouched.
 
 ## Troubleshooting
 - ffmpeg not found: set config.ffmpegPath to the full path to ffmpeg.exe or put ffmpeg on PATH.
